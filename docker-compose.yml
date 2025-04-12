@@ -1,0 +1,39 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres
+    container_name: pgdb
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=mydbpass
+    ports:
+      - 5432:5432
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - postgrenet
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: expressbackend
+    environment:
+      - DATABASE_URL=postgresql://postgres:mydbpass@db:5432/mydb
+    ports:
+      - 3000:3000
+    command: npm run prismadev
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      - db
+    networks:
+      - postgrenet
+
+networks:
+  postgrenet:
+
+volumes:
+  pgdata:
